@@ -129,9 +129,10 @@
             {{ props.row.email }}
           </a>
           <b-taglist>
-            <template v-for="l in props.row.lists">
+            <!-- eslint-disable-next-line vue/no-v-for-template-key -->
+            <template v-for="l in props.row.lists" v-bind:key="l.id">
               <router-link :to="`/subscribers/lists/${l.id}`"
-                v-bind:key="l.id" style="padding-right:0.5em;">
+                 style="padding-right:0.5em;">
                 <b-tag :class="l.subscriptionStatus" size="is-small" :key="l.id">
                   {{ l.name }}
                   <sup v-if="l.optin === 'double' || l.subscriptionStatus == 'unsubscribed'">

@@ -2,8 +2,9 @@
     <section class="log-view">
       <b-loading :active="loading" :is-full-page="false" />
       <div class="lines" ref="lines">
-        <template v-for="(l, i) in lines">
-          <span :set="line = splitLine(l)" :key="i" class="line">
+        <!-- eslint-disable-next-line vue/no-v-for-template-key -->
+        <template v-for="(l, i) in lines" :key="i">
+          <span :set="line = splitLine(l)" class="line">
             <span class="timestamp" :title="line.file">{{ line.timestamp }}</span>
             <span class="log-message">{{ line.message }}</span>
           </span>
