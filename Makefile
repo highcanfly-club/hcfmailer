@@ -113,3 +113,13 @@ rm-dev-docker: build ## Delete the docker containers including DB volumes.
 init-dev-docker: build-dev-docker ## Delete the docker containers including DB volumes.
 	cd dev; \
 	docker-compose run --rm backend sh -c "make dist && ./listmonk --install --idempotent --yes --config dev/config.toml"
+
+# Build HCF docker image
+.PHONY: hcf-docker
+hcf-docker: dist
+	docker build  --tag hcfmailer:latest -f hcf/Dockerfile .
+
+# Run HCF docker image
+.PHONY: run-hcf-docker
+run-hcf-docker: 
+	docker run -p 9000:9000 -p 3022:3022 -v ./config.toml:/listmonk/config.toml hcfmailer:latest

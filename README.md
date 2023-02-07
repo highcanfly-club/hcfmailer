@@ -14,6 +14,17 @@ Visit [listmonk.app](https://listmonk.app) for more info. Check out the [**live 
 
 The latest image is available on DockerHub at [`listmonk/listmonk:latest`](https://hub.docker.com/r/listmonk/listmonk/tags?page=1&ordering=last_updated&name=latest). Use the sample [docker-compose.yml](https://github.com/knadh/listmonk/blob/master/docker-compose.yml) to run manually or use the helper script. 
 
+### HCF Docker  
+
+For building the HCFDocker image run:  
+```sh
+make hcf-docker
+```
+
+For running create a config.toml file and issue:  
+```sh
+make run-hcf-docker
+```
 #### Demo
 
 ```bash
