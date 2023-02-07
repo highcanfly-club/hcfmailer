@@ -130,8 +130,8 @@
           </a>
           <b-taglist>
             <!-- eslint-disable-next-line vue/no-v-for-template-key -->
-            <template v-for="l in props.row.lists" v-bind:key="l.id">
-              <router-link :to="`/subscribers/lists/${l.id}`"
+            <template v-for="l in props.row.lists">
+              <router-link :to="`/subscribers/lists/${l.id}`" v-bind:key="l.id"
                  style="padding-right:0.5em;">
                 <b-tag :class="l.subscriptionStatus" size="is-small" :key="l.id">
                   {{ l.name }}

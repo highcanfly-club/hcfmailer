@@ -3,8 +3,8 @@
       <b-loading :active="loading" :is-full-page="false" />
       <div class="lines" ref="lines">
         <!-- eslint-disable-next-line vue/no-v-for-template-key -->
-        <template v-for="(l, i) in lines" :key="i">
-          <span :set="line = splitLine(l)" class="line">
+        <template v-for="(l, i) in lines">
+          <span :set="line = splitLine(l)" class="line" :key="i">
             <span class="timestamp" :title="line.file">{{ line.timestamp }}</span>
             <span class="log-message">{{ line.message }}</span>
           </span>
