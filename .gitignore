@@ -9,3 +9,8 @@ node_modules
 listmonk
 dist/*
 config-cockroach.toml
+config-local.toml
+config-mogenius.toml
+cockroach-v22.2.3.linux-amd64/cockroach
+cockroach-v22.2.3.linux-amd64/lib/libgeos_c.so
+cockroach-v22.2.3.linux-amd64/lib/libgeos.so
