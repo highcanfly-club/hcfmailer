@@ -24,6 +24,10 @@ make hcf-docker
 For running create a config.toml file and issue:  
 ```sh
 make run-hcf-docker
+
+For using a private CA certificate declare an environment variable CA_CERTIFICATE.  
+It must be a single line variable, replace all newline with a |  
+The image expose a ssh port on 3022, it only supports ssh-key login, for supplying yours add a SSH_PUBKEY environment variable with your public key  
 ```
 #### Demo
 
