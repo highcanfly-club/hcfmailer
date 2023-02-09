@@ -1,0 +1,72 @@
+version: '3'
+
+services:
+  nginx:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    deploy:
+      resources:
+          limits:
+            cpus: "0.25"
+            memory: "0.2G"
+    ports:
+      - "80:80" # Public HTTP Port
+      - "443:443" # Public HTTPS Port
+      - "81:81" # Admin Web Port
+    domainname: "hcfmailing"
+    volumes:
+      - nginx-data:/data
+      - nginx-letsencrypt:/etc/letsencrypt
+  postgres:
+    image: highcanfly/postgresql-ssl:latest
+    environment:
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        POSTGRES_DB: ${POSTGRES_DB}
+        POSTGRES_SSL_KEY: ${POSTGRES_SSL_KEY}
+        POSTGRES_SSL_SRT: ${POSTGRES_SSL_SRT}
+    deploy:
+      resources:
+          limits:
+            cpus: "0.25"
+            memory: "0.5G"
+    volumes:
+      - hcfmailing-data:/var/lib/postgresql/data
+  hcfmailer:
+    image: highcanfly/hcfmailer:latest
+    # build:
+    #     context: ..
+    #     dockerfile: hcf/Dockerfile
+    environment:
+        LISTMONK_app__address: "0.0.0.0:9000"
+        LISTMONK_app__admin_username: ${LISTMONK_USER}
+        LISTMONK_app__admin_password: ${LISTMONK_PASSWORD}
+        LISTMONK_db__host: "postgres"
+        LISTMONK_db__port: 5432
+        LISTMONK_db__user: ${POSTGRES_USER}
+        LISTMONK_db__password: ${POSTGRES_PASSWORD}
+        LISTMONK_db__database: ${POSTGRES_DB}
+        LISTMONK_db__ssl_mode: "require"
+    ports:
+      - "3022:3022" # Public SSH Port
+    deploy:
+      resources:
+          limits:
+            cpus: "0.5"
+            memory: "0.5G"
+volumes:
+  nginx-data:
+    # driver: azure_file
+    # driver_opts:
+    #   share_name: hcfmailing-nginx
+    #   storage_account_name: highcanflystore
+  nginx-letsencrypt:
+    # driver: azure_file
+    # driver_opts:
+    #   share_name: hcfmailing-letsencrypt
+    #   storage_account_name: highcanflystore
+  hcfmailing-data:
+    # driver: azure_file
+    # driver_opts:
+    #   share_name: hcfmailing-data
+    #   storage_account_name: highcanflystore
