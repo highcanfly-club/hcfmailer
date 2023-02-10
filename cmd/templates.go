@@ -24,7 +24,7 @@ const (
 		<h3>Sub heading</h3>
 		<p>Nam luctus dui non placerat mattis. Morbi non accumsan orci, vel interdum urna. Duis faucibus id nunc ut euismod. Curabitur et eros id erat feugiat fringilla in eget neque. Aliquam accumsan cursus eros sed faucibus.</p>
 
-		<p>Here is a link to <a href="https://listmonk.app" target="_blank">listmonk</a>.</p>`
+		<p>Here is a link to <a href="https://highcanfly.club" target="_blank">listmonk</a>.</p>`
 )
 
 var (

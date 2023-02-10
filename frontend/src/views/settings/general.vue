@@ -82,7 +82,7 @@
           </option>
       </b-select>
       <p class="mt-2">
-        <a href="https://listmonk.app/docs/i18n/#additional-language-packs" target="_blank">{{ $t('globals.buttons.more') }} &rarr;</a>
+        <a href="https://highcanfly.club/docs/i18n/#additional-language-packs" target="_blank">{{ $t('globals.buttons.more') }} &rarr;</a>
       </p>
     </b-field>
   </div>

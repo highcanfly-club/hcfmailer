@@ -45,7 +45,7 @@
                 </b-input>
                 <span class="is-size-6 has-text-grey">
                   {{ $t('subscribers.advancedQueryHelp') }}.{{ ' ' }}
-                  <a href="https://listmonk.app/docs/querying-and-segmentation"
+                  <a href="https://highcanfly.club/docs/querying-and-segmentation"
                     target="_blank" rel="noopener noreferrer">
                     {{ $t('globals.buttons.learnMore') }}.
                   </a>

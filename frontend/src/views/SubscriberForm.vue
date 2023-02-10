@@ -69,7 +69,7 @@
           :message="$t('subscribers.attribsHelp') + ' ' + egAttribs">
           <div>
             <b-input v-model="form.strAttribs" name="attribs" type="textarea" />
-            <a href="https://listmonk.app/docs/concepts"
+            <a href="https://highcanfly.club/docs/concepts"
               target="_blank" rel="noopener noreferrer" class="is-size-7">
               {{ $t('globals.buttons.learnMore') }} <b-icon icon="link-variant" size="is-small" />
             </a>

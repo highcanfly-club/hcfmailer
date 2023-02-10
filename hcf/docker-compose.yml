@@ -49,6 +49,7 @@ services:
         LISTMONK_db__ssl_mode: "require"
     ports:
       - "3022:3022" # Public SSH Port
+      - "9000:9000" # Listmonk admin port
     deploy:
       resources:
           limits:

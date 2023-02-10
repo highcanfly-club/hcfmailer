@@ -144,11 +144,11 @@ func install(lastVer string, db *sqlx.DB, fs stuffbin.FileSystem, prompt, idempo
 		"No Reply <noreply@yoursite.com>",
 		`<h3>Hi {{ .Subscriber.FirstName }}!</h3>
 		<p>This is a test e-mail campaign. Your second name is {{ .Subscriber.LastName }} and you are from {{ .Subscriber.Attribs.city }}.</p>
-		<p>Here is a <a href="https://listmonk.app@TrackLink">tracked link</a>.</p>
+		<p>Here is a <a href="https://highcanfly.club@TrackLink">tracked link</a>.</p>
 		<p>Use the link icon in the editor toolbar or when writing raw HTML or Markdown,
 			simply suffix @TrackLink to the end of a URL to turn it into a tracking link. Example:</p>
 		<pre>&lt;a href=&quot;https:/&zwnj;/listmonk.app&#064;TrackLink&quot;&gt;&lt;/a&gt;</pre>
-		<p>For help, refer to the <a href="https://listmonk.app/docs">documentation</a>.</p>
+		<p>For help, refer to the <a href="https://highcanfly.club/docs">documentation</a>.</p>
 		`,
 		nil,
 		"richtext",

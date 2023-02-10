@@ -50,7 +50,7 @@
             <template v-if="form.type === 'campaign'">
               {{ $t('templates.placeholderHelp', { placeholder: egPlaceholder }) }}
             </template>
-            <a target="_blank" href="https://listmonk.app/docs/templating">
+            <a target="_blank" href="https://highcanfly.club/docs/templating">
               {{ $t('globals.buttons.learnMore') }}
             </a>
           </p>
