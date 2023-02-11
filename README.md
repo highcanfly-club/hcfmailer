@@ -29,6 +29,9 @@ For using a private CA certificate declare an environment variable CA_CERTIFICAT
 It must be a single line variable, replace all newline with a |  
 The image expose a ssh port on 3022, it only supports ssh-key login, for supplying yours add a SSH_PUBKEY environment variable with your public key  
 ```
+
+For a complete running system see hcf/start.sh  
+
 #### Demo
 
 ```bash

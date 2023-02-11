@@ -55,6 +55,17 @@ services:
           limits:
             cpus: "0.5"
             memory: "0.5G"
+  smtpd:
+    image: highcanfly/smtp-relay:latest
+    environment:
+        ALLOWED_SENDER_DOMAINS: ${ALLOWED_SENDER_DOMAINS}
+        DKIM_PRIVATE_KEY: ${DKIM_PRIVATE_KEY}
+        DKIM_SELECTOR: ${DKIM_SELECTOR}
+    deploy:
+      resources:
+          limits:
+            cpus: "0.5"
+            memory: "0.3G"
 volumes:
   nginx-data:
     # driver: azure_file
