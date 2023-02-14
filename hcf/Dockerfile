@@ -16,7 +16,7 @@ COPY --from=builder /listmonk/listmonk /listmonk/
 COPY --chown=root:root hcf/hcfmailer_entrypoint.sh /listmonk/hcfmailer_entrypoint.sh
 RUN set -ex; \
     apk add --update --no-cache  ca-certificates tzdata\
-    pwgen bash openrc openssh netcat-openbsd &&  \
+    pwgen bash openrc openssh netcat-openbsd postgresql15-client &&  \
     mkdir -p /root/.ssh && \
     chmod 0700 /root/.ssh && \
     ssh-keygen -A \
