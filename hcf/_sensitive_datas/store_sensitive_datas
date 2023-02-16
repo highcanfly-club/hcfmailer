@@ -1,0 +1,8 @@
+#!/bin/bash
+#1-store
+cd $PROJECT_ROOT
+tar -cvJf hcf/_sensitive_datas/_sensitive_datas.tar.xz .vscode/launch.json .vscode/settings.json hcf/proxy/launch-* hcf/proxy/publish-* hcf/okteto/okteto-kube.config
+#2-encrypt
+openssl aes-256-cbc -base64 -md sha256 -in hcf/_sensitive_datas/_sensitive_datas.tar.xz -out hcf/_sensitive_datas/_sensitive_datas.tar.xz.enc
+#3-delete 
+rm hcf/_sensitive_datas/_sensitive_datas.tar.xz

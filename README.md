@@ -31,6 +31,20 @@ The image expose a ssh port on 3022, it only supports ssh-key login, for supplyi
 ```
 
 For a complete running system see hcf/start.sh  
+you need to declare
+DKIM_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----|MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSj……………BuoTsIHpowYjVbps4=|-----END PRIVATE KEY-----" 
+DKIM_SELECTOR=yourselector
+ALLOWED_SENDER_DOMAINS="example.org example.net example.com" 
+POSTGRES_DB=listmonk
+POSTGRES_PASSWORD=apassword 
+POSTGRES_USER=auser 
+LISTMONK_USER=listmonk 
+LISTMONK_PASSWORD=averysecurepassword
+OKETO_NS=yournamespace
+OKTETO_FQDN_HCFMAILER=name-yournamespace.cloud.okteto.net
+SSH_PUBKEY="ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLIHfyW0g6kUxa4hn1fWzrIY/98HVWEymk8liFRadW2bCknHdLyNnzYGOQvcHlg+mLhFhSJwiA5DaHAEwwHbRQE= key@hcfmailer"
+
+for deploying on a Kubernetes cluster see hcf/okteto/sart-k8s.sh 
 
 #### Demo
 
