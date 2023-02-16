@@ -27,6 +27,22 @@ stringData:
 
 ---
 apiVersion: v1
+kind: Secret
+metadata:
+  name: smtpd
+  namespace: $OKTETO_NS
+  labels:
+    app.kubernetes.io/name: smtpd
+    app.kubernetes.io/instance: smtpd
+type: Opaque
+stringData:
+  cloudflare-zone-id: $CLOUDFLARE_ZONE_ID
+  cloudflare-api_key: $CLOUDFLARE_API_KEY
+  cloudflare-dns-records: $CLOUDFLARE_DNS_RECORDS
+  postfix-hostname: $POSTFIX_HOSTNAME
+
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   creationTimestamp: null
@@ -471,6 +487,31 @@ spec:
               value: $DKIM_PRIVATE_KEY
             - name: DKIM_SELECTOR
               value: $DKIM_SELECTOR
+            - name: CLOUDFLARE_ZONE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: smtpd
+                  key: cloudflare-zone-id
+            - name: CLOUDFLARE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: smtpd
+                  key: cloudflare-api_key
+            - name: CLOUDFLARE_DNS_RECORDS
+              valueFrom:
+                secretKeyRef:
+                  name: smtpd
+                  key: cloudflare-dns-records
+            - name: POSTFIX_myhostname
+              valueFrom:
+                secretKeyRef:
+                  name: smtpd
+                  key: postfix-hostname
+            - name: POSTFIX_helo_name
+              valueFrom:
+                secretKeyRef:
+                  name: smtpd
+                  key: postfix-hostname
           image: highcanfly/smtp-relay:latest
           name: smtpd
           ports:

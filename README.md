@@ -44,6 +44,10 @@ LISTMONK_PASSWORD=averysecurepassword                        #mandatory (the adm
 OKETO_NS=yournamespace                                       #mandatory (the K8S namespace)
 OKTETO_FQDN_HCFMAILER=name-yournamespace.cloud.okteto.net    #mandatory (the fqdn for the admin UI -ingress)
 SSH_PUBKEY="ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLIHfyW0g6kUxa4hn1fWzrIY/98HVWEymk8liFRadW2bCknHdLyNnzYGOQvcHlg+mLhFhSJwiA5DaHAEwwHbRQE= key@hcfmailer" #(optional a valid ssh pubkey - will be filled as authorized key)
+CLOUDFLARE_API_KEY="the-zone-id"                               #mandatory
+CLOUDFLARE_ZONE_ID="your-api-key-with-dns-rights"              #mandatory
+CLOUDFLARE_DNS_RECORDS="smtpd.example.org, smtpd2.example.ord" #Mandatory
+POSTFIX_HOSTNAME="smtpd.example.org"                           #Recommended
 ```
 for deploying on a Kubernetes cluster see hcf/okteto/sart-k8s.sh 
 
