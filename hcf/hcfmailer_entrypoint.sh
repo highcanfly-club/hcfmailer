@@ -39,6 +39,20 @@ max_open = 25
 max_idle = 25
 max_lifetime = "300s"
 EOF
+cat > ~/.pgpass << EOF
+$LISTMONK_db__host:$LISTMONK_db__port:$LISTMONK_db__database:$LISTMONK_db__user:$LISTMONK_db__password
+EOF
+chmod 600 ~/.pgpass
+cat > /usr/local/bin/db_backup.sh << EOF
+#!/bin/bash
+pg_dump -d $LISTMONK_db__database -h $LISTMONK_db__host -U $LISTMONK_db__user > /listmonk/backups/backup.sql
+EOF
+chmod 744 /usr/local/bin/db_backup.sh
+cat > /usr/local/bin/db_restore.sh << EOF
+#!/bin/bash
+pg_restore -d $LISTMONK_db__database -h $LISTMONK_db__host -U $LISTMONK_db__user /listmonk/backups/backup.sql
+EOF
+chmod 744 /usr/local/bin/db_restore.sh
 fi
 ./listmonk --idempotent --install --yes
 ./listmonk --idempotent --update --yes

@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: postgres
     app.kubernetes.io/instance: postgres
 type: Opaque
-data:
+stringData:
   postgres-password: $POSTGRES_PASSWORD
 
 ---
@@ -50,6 +50,22 @@ metadata:
   labels:
     io.kompose.service: hcfmailing-uploads
   name: hcfmailing-uploads
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+status: {}
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: hcfmailing-backups
+  name: hcfmailing-backups
 spec:
   accessModes:
     - ReadWriteOnce
@@ -294,10 +310,15 @@ spec:
           volumeMounts:
             - mountPath: /listmonk/uploads
               name: hcfmailing-uploads
+            - mountPath: /listmonk/backups
+              name: hcfmailing-backups
       volumes:
         - name: hcfmailing-uploads
           persistentVolumeClaim:
             claimName: hcfmailing-uploads
+        - name: hcfmailing-backups
+          persistentVolumeClaim:
+            claimName: hcfmailing-backups
       restartPolicy: Always
 status: {}
 
