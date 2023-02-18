@@ -948,7 +948,7 @@ SELECT JSON_BUILD_OBJECT('subscribers', JSON_BUILD_OBJECT(
                         'campaigns', JSON_BUILD_OBJECT(
                             'total', (SELECT COUNT(*) FROM campaigns),
                             'by_status', (
-                                SELECT JSON_OBJECT_AGG (status, num) FROM
+                                SELECT JSON_OBJECT_AGG (status::TEXT, num) FROM
                                 (SELECT status, COUNT(*) AS num FROM campaigns GROUP BY status) r
                             )
                         ),

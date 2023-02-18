@@ -1,15 +1,27 @@
-DROP TYPE IF EXISTS list_type CASCADE; CREATE TYPE list_type AS ENUM ('public', 'private', 'temporary');
-DROP TYPE IF EXISTS list_optin CASCADE; CREATE TYPE list_optin AS ENUM ('single', 'double');
-DROP TYPE IF EXISTS subscriber_status CASCADE; CREATE TYPE subscriber_status AS ENUM ('enabled', 'disabled', 'blocklisted');
-DROP TYPE IF EXISTS subscription_status CASCADE; CREATE TYPE subscription_status AS ENUM ('unconfirmed', 'confirmed', 'unsubscribed');
-DROP TYPE IF EXISTS campaign_status CASCADE; CREATE TYPE campaign_status AS ENUM ('draft', 'running', 'scheduled', 'paused', 'cancelled', 'finished');
-DROP TYPE IF EXISTS campaign_type CASCADE; CREATE TYPE campaign_type AS ENUM ('regular', 'optin');
-DROP TYPE IF EXISTS content_type CASCADE; CREATE TYPE content_type AS ENUM ('richtext', 'html', 'plain', 'markdown');
-DROP TYPE IF EXISTS bounce_type CASCADE; CREATE TYPE bounce_type AS ENUM ('soft', 'hard', 'complaint');
-DROP TYPE IF EXISTS template_type CASCADE; CREATE TYPE template_type AS ENUM ('campaign', 'tx');
+DROP TABLE IF EXISTS subscribers CASCADE;
+DROP TABLE IF EXISTS lists CASCADE;
+DROP TABLE IF EXISTS subscriber_lists CASCADE;
+DROP TABLE IF EXISTS templates CASCADE;
+DROP TABLE IF EXISTS campaigns CASCADE;
+DROP TABLE IF EXISTS campaign_lists CASCADE;
+DROP TABLE IF EXISTS campaign_views CASCADE;
+DROP TABLE IF EXISTS media CASCADE;
+DROP TABLE IF EXISTS links CASCADE;
+DROP TABLE IF EXISTS link_clicks CASCADE;
+DROP TABLE IF EXISTS settings CASCADE;
+DROP TABLE IF EXISTS bounces CASCADE;
+
+DROP TYPE IF EXISTS list_type ; CREATE TYPE list_type AS ENUM ('public', 'private', 'temporary');
+DROP TYPE IF EXISTS list_optin ; CREATE TYPE list_optin AS ENUM ('single', 'double');
+DROP TYPE IF EXISTS subscriber_status ; CREATE TYPE subscriber_status AS ENUM ('enabled', 'disabled', 'blocklisted');
+DROP TYPE IF EXISTS subscription_status ; CREATE TYPE subscription_status AS ENUM ('unconfirmed', 'confirmed', 'unsubscribed');
+DROP TYPE IF EXISTS campaign_status ; CREATE TYPE campaign_status AS ENUM ('draft', 'running', 'scheduled', 'paused', 'cancelled', 'finished');
+DROP TYPE IF EXISTS campaign_type ; CREATE TYPE campaign_type AS ENUM ('regular', 'optin');
+DROP TYPE IF EXISTS content_type ; CREATE TYPE content_type AS ENUM ('richtext', 'html', 'plain', 'markdown');
+DROP TYPE IF EXISTS bounce_type ; CREATE TYPE bounce_type AS ENUM ('soft', 'hard', 'complaint');
+DROP TYPE IF EXISTS template_type ; CREATE TYPE template_type AS ENUM ('campaign', 'tx');
 
 -- subscribers
-DROP TABLE IF EXISTS subscribers CASCADE;
 CREATE TABLE subscribers (
     id              SERIAL PRIMARY KEY,
     uuid uuid       NOT NULL UNIQUE,
@@ -25,7 +37,6 @@ DROP INDEX IF EXISTS idx_subs_email; CREATE UNIQUE INDEX idx_subs_email ON subsc
 DROP INDEX IF EXISTS idx_subs_status; CREATE INDEX idx_subs_status ON subscribers(status);
 
 -- lists
-DROP TABLE IF EXISTS lists CASCADE;
 CREATE TABLE lists (
     id              SERIAL PRIMARY KEY,
     uuid            uuid NOT NULL UNIQUE,
@@ -39,7 +50,6 @@ CREATE TABLE lists (
     updated_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-DROP TABLE IF EXISTS subscriber_lists CASCADE;
 CREATE TABLE subscriber_lists (
     subscriber_id      INTEGER REFERENCES subscribers(id) ON DELETE CASCADE ON UPDATE CASCADE,
     list_id            INTEGER NULL REFERENCES lists(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -55,7 +65,6 @@ DROP INDEX IF EXISTS idx_sub_lists_list_id; CREATE INDEX idx_sub_lists_list_id O
 DROP INDEX IF EXISTS idx_sub_lists_status; CREATE INDEX idx_sub_lists_status ON subscriber_lists(status);
 
 -- templates
-DROP TABLE IF EXISTS templates CASCADE;
 CREATE TABLE templates (
     id              SERIAL PRIMARY KEY,
     name            TEXT NOT NULL,
@@ -71,7 +80,6 @@ CREATE UNIQUE INDEX ON templates (is_default) WHERE is_default = true;
 
 
 -- campaigns
-DROP TABLE IF EXISTS campaigns CASCADE;
 CREATE TABLE campaigns (
     id               SERIAL PRIMARY KEY,
     uuid uuid        NOT NULL UNIQUE,
@@ -110,7 +118,6 @@ CREATE TABLE campaigns (
     updated_at       TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-DROP TABLE IF EXISTS campaign_lists CASCADE;
 CREATE TABLE campaign_lists (
     id           BIGSERIAL PRIMARY KEY,
     campaign_id  INTEGER NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -124,7 +131,6 @@ CREATE UNIQUE INDEX ON campaign_lists (campaign_id, list_id);
 DROP INDEX IF EXISTS idx_camp_lists_camp_id; CREATE INDEX idx_camp_lists_camp_id ON campaign_lists(campaign_id);
 DROP INDEX IF EXISTS idx_camp_lists_list_id; CREATE INDEX idx_camp_lists_list_id ON campaign_lists(list_id);
 
-DROP TABLE IF EXISTS campaign_views CASCADE;
 CREATE TABLE campaign_views (
     id               BIGSERIAL PRIMARY KEY,
     campaign_id      INTEGER NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -138,7 +144,6 @@ DROP INDEX IF EXISTS idx_views_subscriber_id; CREATE INDEX idx_views_subscriber_
 DROP INDEX IF EXISTS idx_views_date; CREATE INDEX idx_views_date ON campaign_views((TIMEZONE('UTC', created_at)::DATE));
 
 -- media
-DROP TABLE IF EXISTS media CASCADE;
 CREATE TABLE media (
     id               SERIAL PRIMARY KEY,
     uuid uuid        NOT NULL UNIQUE,
@@ -150,7 +155,6 @@ CREATE TABLE media (
 );
 
 -- links
-DROP TABLE IF EXISTS links CASCADE;
 CREATE TABLE links (
     id               SERIAL PRIMARY KEY,
     uuid uuid        NOT NULL UNIQUE,
@@ -158,7 +162,6 @@ CREATE TABLE links (
     created_at       TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-DROP TABLE IF EXISTS link_clicks CASCADE;
 CREATE TABLE link_clicks (
     id               BIGSERIAL PRIMARY KEY,
     campaign_id      INTEGER NULL REFERENCES campaigns(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -174,7 +177,6 @@ DROP INDEX IF EXISTS idx_clicks_sub_id; CREATE INDEX idx_clicks_sub_id ON link_c
 DROP INDEX IF EXISTS idx_clicks_date; CREATE INDEX idx_clicks_date ON link_clicks((TIMEZONE('UTC', created_at)::DATE));
 
 -- settings
-DROP TABLE IF EXISTS settings CASCADE;
 CREATE TABLE settings (
     key             TEXT NOT NULL UNIQUE,
     value           JSONB NOT NULL DEFAULT '{}',
@@ -243,7 +245,6 @@ INSERT INTO settings (key, value) VALUES
     ('appearance.public.custom_js', '""');
 
 -- bounces
-DROP TABLE IF EXISTS bounces CASCADE;
 CREATE TABLE bounces (
     id               SERIAL PRIMARY KEY,
     subscriber_id    INTEGER NOT NULL REFERENCES subscribers(id) ON DELETE CASCADE ON UPDATE CASCADE,
