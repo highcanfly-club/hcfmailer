@@ -1,0 +1,125 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pgadmin
+  namespace: $OKTETO_NS
+  labels:
+    app.kubernetes.io/name: pgadmin
+    app.kubernetes.io/instance: pgadmin
+type: Opaque
+stringData:
+  pgadmin-email: $PGADMIN_DEFAULT_EMAIL
+  pgadmin-password: $PGADMIN_DEFAULT_PASSWORD
+  
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: pgadmin-data
+  name: pgadmin-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  volumeMode: Filesystem
+status: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: pgadmin
+  name: pgadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: pgadmin
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/hcf-default: "true"
+        io.kompose.service: pgadmin
+    spec:
+      containers:
+        - env:
+            - name: PGADMIN_DEFAULT_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: pgadmin
+                  key: pgadmin-email
+            - name: PGADMIN_DEFAULT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgadmin
+                  key: pgadmin-password
+          image: dpage/pgadmin4
+          name: pgadmin
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: 250m
+              memory: "214748364"
+          volumeMounts:
+            - mountPath: /var/lib/pgadmin
+              name: pgadmin-data
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+      restartPolicy: Always
+      volumes:
+        - name: pgadmin-data
+          persistentVolumeClaim:
+            claimName: pgadmin-data
+status: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: pgadmin
+  name: pgadmin
+spec:
+  ports:
+    - name: "80"
+      port: 80
+      targetPort: 80
+  selector:
+    io.kompose.service: pgadmin
+status:
+  loadBalancer: {}
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pgadmin
+  namespace: $OKTETO_NS
+  annotations:
+    # dev.okteto.com/generate-host: "true"
+spec:
+  rules:
+  - host: pgadmin-$OKTETO_NS.cloud.okteto.net
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: pgadmin
+              port:
+                number: 80
+
