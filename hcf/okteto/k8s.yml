@@ -329,7 +329,7 @@ metadata:
     io.kompose.service: smtpd
   name: smtpd
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       io.kompose.service: smtpd
@@ -367,6 +367,8 @@ spec:
                 secretKeyRef:
                   name: smtpd
                   key: cloudflare-dns-records
+            - name: POSTFIX_HOSTNAME
+              value: $POSTFIX_HOSTNAME
             - name: POSTFIX_myhostname
               valueFrom:
                 secretKeyRef:
@@ -385,6 +387,13 @@ spec:
             limits:
               cpu: 900m
               memory: "322122547"
+          volumeMounts:
+            - mountPath: /listmonk/backups
+              name: hcfmailing-backups
+      volumes:
+        - name: hcfmailing-backups
+          persistentVolumeClaim:
+            claimName: hcfmailing-backups
       restartPolicy: Always
 status: {}
 

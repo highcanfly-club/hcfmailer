@@ -19,3 +19,4 @@ kubekey
 hcf/_sensitive_datas/_sensitive_datas.tar.xz
 hcf/proxy/launch-worker
 hcf/proxy/publish-worker
+hcf/backups
