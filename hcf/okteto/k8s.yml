@@ -10,6 +10,8 @@ metadata:
 type: Opaque
 stringData:
   postgres-password: $POSTGRES_PASSWORD
+  postgres-username: $POSTGRES_USER
+  postgres-db: $POSTGRES_DB
 
 ---
 apiVersion: v1
@@ -22,6 +24,7 @@ metadata:
     app.kubernetes.io/instance: listmonk
 type: Opaque
 stringData:
+  listmonk-user: $LISTMONK_USER
   listmonk-password: $LISTMONK_PASSWORD
   ssh-pubkey: $SSH_PUBKEY
 
@@ -40,6 +43,10 @@ stringData:
   cloudflare-api_key: $CLOUDFLARE_API_KEY
   cloudflare-dns-records: $CLOUDFLARE_DNS_RECORDS
   postfix-hostname: $POSTFIX_HOSTNAME
+  smtpd-allowed-sender-domains: $ALLOWED_SENDER_DOMAINS
+  smtpd-dkim-private-key: $DKIM_PRIVATE_KEY
+  smtpd-dkim-selector: $DKIM_SELECTOR
+  smtpd-postfix-hotname: POSTFIX_HOSTNAME
 
 ---
 apiVersion: v1
@@ -217,9 +224,15 @@ spec:
                   name: listmonk
                   key: listmonk-password
             - name: LISTMONK_app__admin_username
-              value: $LISTMONK_USER
+              valueFrom:
+                secretKeyRef:
+                  name: listmonk
+                  key: listmonk-user
             - name: LISTMONK_db__database
-              value: $POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: postgres-db
             - name: LISTMONK_db__host
               value: postgres
             - name: LISTMONK_db__password
@@ -232,7 +245,10 @@ spec:
             - name: LISTMONK_db__ssl_mode
               value: "disable"
             - name: LISTMONK_db__user
-              value: $POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: postgres-username
           image: highcanfly/hcfmailer:latest
           name: hcfmailer
           ports:
@@ -282,7 +298,10 @@ spec:
       containers:
         - env:
             - name: POSTGRES_DATABASE
-              value: $POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: postgres-db
             - name: POSTGRESQL_VOLUME_DIR
               value: /bitnami/postgresql
             - name: PGDATA
@@ -293,7 +312,10 @@ spec:
                   name: postgres
                   key: postgres-password
             - name: POSTGRES_USERNAME
-              value: $POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: postgres-username
             - name: BITNAMI_DEBUG
               value: "true"
           image: bitnami/postgresql:latest
@@ -350,11 +372,20 @@ spec:
       containers:
         - env:
             - name: ALLOWED_SENDER_DOMAINS
-              value: $ALLOWED_SENDER_DOMAINS
+              valueFrom:
+                secretKeyRef:
+                  name: smtpd
+                  key: smtpd-allowed-sender-domains
             - name: DKIM_PRIVATE_KEY
-              value: $DKIM_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: smtpd
+                  key: smtpd-dkim-private-key
             - name: DKIM_SELECTOR
-              value: $DKIM_SELECTOR
+              valueFrom:
+                secretKeyRef:
+                  name: smtpd
+                  key: smtpd-dkim-selector
             - name: CLOUDFLARE_ZONE_ID
               valueFrom:
                 secretKeyRef:
@@ -371,7 +402,10 @@ spec:
                   name: smtpd
                   key: cloudflare-dns-records
             - name: POSTFIX_HOSTNAME
-              value: $POSTFIX_HOSTNAME
+              valueFrom:
+                secretKeyRef:
+                  name: smtpd
+                  key: postfix-hostname
             - name: POSTFIX_myhostname
               valueFrom:
                 secretKeyRef:
@@ -549,7 +583,7 @@ spec:
                 secretKeyRef:
                   name: pgadmin
                   key: pgadmin-password
-          image: dpage/pgadmin4
+          image: dpage/pgadmin4:latest
           name: pgadmin
           ports:
             - containerPort: 80
