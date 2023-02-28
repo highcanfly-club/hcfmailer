@@ -1,0 +1,119 @@
+hcfmailer:
+  hcfmailer:
+    env:
+      listmonkAppAddress: 0.0.0.0:9000
+      listmonkDbHost: postgres
+      listmonkDbPort: "5432"
+      listmonkDbSslMode: disable
+    image:
+      repository: highcanfly/hcfmailer
+      tag: latest
+    resources:
+      limits:
+        cpu: 900m
+        memory: "536870912"
+  ports:
+  - name: "3022"
+    port: 3022
+    targetPort: 3022
+  - name: "9000"
+    port: 9000
+    targetPort: 9000
+  replicas: 1
+  type: ClusterIP
+kubernetesClusterDomain: cluster.local
+listmonk:
+  listmonkPassword: ""
+  listmonkUser: ""
+  sshPubkey: ""
+  newsletterFqdnHost: "newsletter.example.net"
+pgadmin:
+  pgadmin:
+    image:
+      repository: dpage/pgadmin4
+      tag: latest
+    resources:
+      limits:
+        cpu: 250m
+        memory: "214748364"
+  pgadminEmail: ""
+  pgadminPassword: ""
+  pgadminHostFqdn: "pgadmin.example.net"
+  ports:
+  - name: "80"
+    port: 80
+    targetPort: 80
+  replicas: 1
+  type: ClusterIP
+postgres:
+  ports:
+  - name: "5432"
+    port: 5432
+    targetPort: 5432
+  postgres:
+    env:
+      bitnamiDebug: "true"
+      pgdata: /bitnami/postgresql/data
+      postgresqlVolumeDir: /bitnami/postgresql
+    image:
+      repository: bitnami/postgresql
+      tag: latest
+    resources:
+      limits:
+        cpu: 500m
+        memory: "536870912"
+  postgresDb: ""
+  postgresPassword: ""
+  postgresUsername: ""
+  replicas: 1
+  type: ClusterIP
+pvc:
+  data:
+    storageRequest: 1Gi
+  hcfmailingBackups:
+    storageRequest: 1Gi
+  hcfmailingPgsql:
+    storageRequest: 1Gi
+  hcfmailingUploads:
+    storageRequest: 1Gi
+smtpd:
+  cloudflareApiKey: ""
+  cloudflareDnsRecords: ""
+  cloudflareZoneId: ""
+  ports:
+  - name: "25"
+    port: 25
+    targetPort: 25
+  postfixHostname: ""
+  replicas: 2
+  smtpd:
+    image:
+      repository: highcanfly/smtp-relay
+      tag: latest
+    resources:
+      limits:
+        cpu: 900m
+        memory: "322122547"
+  smtpdAllowedSenderDomains: ""
+  smtpdDkimPrivateKey: ""
+  smtpdDkimSelector: ""
+  smtpdPostfixHotname: ""
+  type: ClusterIP
+webssh:
+  adminFqdnHost: "admin.example.net"
+  ports:
+  - name: "8888"
+    port: 8888
+    targetPort: 8888
+  replicas: 1
+  type: ClusterIP
+  webssh:
+    env:
+      listmonkSsh: "3022"
+    image:
+      repository: highcanfly/webssh
+      tag: latest
+    resources:
+      limits:
+        cpu: 500m
+        memory: "536870912"

@@ -1,0 +1,344 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hcfmailer.fullname" . }}-hcfmailer
+  labels:
+    io.kompose.service: hcfmailer
+  {{- include "hcfmailer.labels" . | nindent 4 }}
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yml -o okteto/k8s.yml
+    kompose.version: 1.28.0 (c4137012e)
+spec:
+  replicas: {{ .Values.hcfmailer.replicas }}
+  selector:
+    matchLabels:
+      io.kompose.service: hcfmailer
+    {{- include "hcfmailer.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        io.kompose.network/hcf-default: "true"
+        io.kompose.service: hcfmailer
+      {{- include "hcfmailer.selectorLabels" . | nindent 8 }}
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yml -o okteto/k8s.yml
+        kompose.version: 1.28.0 (c4137012e)
+    spec:
+      containers:
+      - env:
+        - name: SSH_PUBKEY
+          valueFrom:
+            secretKeyRef:
+              key: ssh-pubkey
+              name: {{ include "hcfmailer.fullname" . }}-listmonk
+        - name: LISTMONK_app__address
+          value: {{ .Values.hcfmailer.hcfmailer.listmonkAppAddress }}
+        - name: LISTMONK_app__admin_password
+          valueFrom:
+            secretKeyRef:
+              key: listmonk-password
+              name: {{ include "hcfmailer.fullname" . }}-listmonk
+        - name: LISTMONK_app__admin_username
+          valueFrom:
+            secretKeyRef:
+              key: listmonk-user
+              name: {{ include "hcfmailer.fullname" . }}-listmonk
+        - name: LISTMONK_db__database
+          valueFrom:
+            secretKeyRef:
+              key: postgres-db
+              name: {{ include "hcfmailer.fullname" . }}-postgres
+        - name: LISTMONK_db__host
+          value: {{ .Values.hcfmailer.hcfmailer.listmonkDbHost }}
+        - name: LISTMONK_db__password
+          valueFrom:
+            secretKeyRef:
+              key: postgres-password
+              name: {{ include "hcfmailer.fullname" . }}-postgres
+        - name: LISTMONK_db__port
+          value: {{ .Values.hcfmailer.hcfmailer.listmonkDbPort }}
+        - name: LISTMONK_db__ssl_mode
+          value: {{ .Values.hcfmailer.hcfmailer.listmonkDbSslMode }}
+        - name: LISTMONK_db__user
+          valueFrom:
+            secretKeyRef:
+              key: postgres-username
+              name: {{ include "hcfmailer.fullname" . }}-postgres
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ .Values.kubernetesClusterDomain }}
+        image: {{ .Values.hcfmailer.hcfmailer.image.repository }}:{{ .Values.hcfmailer.hcfmailer.image.tag
+          | default .Chart.AppVersion }}
+        name: hcfmailer
+        ports:
+        - containerPort: 3022
+        - containerPort: 9000
+        resources: {{- toYaml .Values.hcfmailer.hcfmailer.resources | nindent 10 }}
+        volumeMounts:
+        - mountPath: /listmonk/uploads
+          name: hcfmailing-uploads
+        - mountPath: /listmonk/backups
+          name: hcfmailing-backups
+      restartPolicy: Always
+      volumes:
+      - name: hcfmailing-uploads
+        persistentVolumeClaim:
+          claimName: {{ include "hcfmailer.fullname" . }}-hcfmailing-uploads
+      - name: hcfmailing-backups
+        persistentVolumeClaim:
+          claimName: {{ include "hcfmailer.fullname" . }}-hcfmailing-backups
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hcfmailer.fullname" . }}-postgres
+  labels:
+    io.kompose.service: postgres
+  {{- include "hcfmailer.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.postgres.replicas }}
+  selector:
+    matchLabels:
+      io.kompose.service: postgres
+    {{- include "hcfmailer.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        io.kompose.network/hcf-default: "true"
+        io.kompose.service: postgres
+      {{- include "hcfmailer.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - args:
+        - useradd -u 1000 -g 0 postgres;mkdir -p /opt/bitnami/postgresql/conf; echo "listen_addresses=*"
+          >> /opt/bitnami/postgresql/conf/postgresql.conf ; echo "host     all             all             0.0.0.0/0               md5">/opt/bitnami/postgresql/conf/pg_hba.conf;echo
+          "host     all             all             ::/0               md5">>/opt/bitnami/postgresql/conf/pg_hba.conf;echo
+          "local    all             all                                     md5">>/opt/bitnami/postgresql/conf/pg_hba.conf;echo
+          "host     all             all        127.0.0.1/32                 md5">>/opt/bitnami/postgresql/conf/pg_hba.conf;echo
+          "host     all             all        ::1/128                      md5">>/opt/bitnami/postgresql/conf/pg_hba.conf
+          ; /opt/bitnami/scripts/postgresql/entrypoint.sh; /opt/bitnami/scripts/postgresql/run.sh
+        command:
+        - /bin/sh
+        - -c
+        env:
+        - name: POSTGRES_DATABASE
+          valueFrom:
+            secretKeyRef:
+              key: postgres-db
+              name: {{ include "hcfmailer.fullname" . }}-postgres
+        - name: POSTGRESQL_VOLUME_DIR
+          value: {{ .Values.postgres.postgres.postgresqlVolumeDir }}
+        - name: PGDATA
+          value: {{ .Values.postgres.postgres.pgdata }}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: postgres-password
+              name: {{ include "hcfmailer.fullname" . }}-postgres
+        - name: POSTGRES_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: postgres-username
+              name: {{ include "hcfmailer.fullname" . }}-postgres
+        - name: BITNAMI_DEBUG
+          value: {{ .Values.postgres.postgres.bitnamiDebug }}
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ .Values.kubernetesClusterDomain }}
+        image: {{ .Values.postgres.postgres.image.repository }}:{{ .Values.postgres.postgres.image.tag
+          | default .Chart.AppVersion }}
+        name: postgres
+        ports:
+        - containerPort: 5432
+        resources: {{- toYaml .Values.postgres.postgres.resources | nindent 10 }}
+        securityContext:
+          runAsGroup: 0
+          runAsUser: 0
+        volumeMounts:
+        - mountPath: /bitnami/postgresql
+          name: hcfmailing-pgsql
+      restartPolicy: Always
+      volumes:
+      - name: hcfmailing-pgsql
+        persistentVolumeClaim:
+          claimName: {{ include "hcfmailer.fullname" . }}-hcfmailing-pgsql
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hcfmailer.fullname" . }}-smtpd
+  labels:
+    io.kompose.service: smtpd
+  {{- include "hcfmailer.labels" . | nindent 4 }}
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yml -o okteto/k8s.yml
+    kompose.version: 1.28.0 (c4137012e)
+spec:
+  replicas: {{ .Values.smtpd.replicas }}
+  selector:
+    matchLabels:
+      io.kompose.service: smtpd
+    {{- include "hcfmailer.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        io.kompose.network/hcf-default: "true"
+        io.kompose.service: smtpd
+      {{- include "hcfmailer.selectorLabels" . | nindent 8 }}
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yml -o okteto/k8s.yml
+        kompose.version: 1.28.0 (c4137012e)
+    spec:
+      containers:
+      - env:
+        - name: ALLOWED_SENDER_DOMAINS
+          valueFrom:
+            secretKeyRef:
+              key: smtpd-allowed-sender-domains
+              name: {{ include "hcfmailer.fullname" . }}-smtpd
+        - name: DKIM_PRIVATE_KEY
+          valueFrom:
+            secretKeyRef:
+              key: smtpd-dkim-private-key
+              name: {{ include "hcfmailer.fullname" . }}-smtpd
+        - name: DKIM_SELECTOR
+          valueFrom:
+            secretKeyRef:
+              key: smtpd-dkim-selector
+              name: {{ include "hcfmailer.fullname" . }}-smtpd
+        - name: CLOUDFLARE_ZONE_ID
+          valueFrom:
+            secretKeyRef:
+              key: cloudflare-zone-id
+              name: {{ include "hcfmailer.fullname" . }}-smtpd
+        - name: CLOUDFLARE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: cloudflare-api_key
+              name: {{ include "hcfmailer.fullname" . }}-smtpd
+        - name: CLOUDFLARE_DNS_RECORDS
+          valueFrom:
+            secretKeyRef:
+              key: cloudflare-dns-records
+              name: {{ include "hcfmailer.fullname" . }}-smtpd
+        - name: POSTFIX_HOSTNAME
+          valueFrom:
+            secretKeyRef:
+              key: postfix-hostname
+              name: {{ include "hcfmailer.fullname" . }}-smtpd
+        - name: POSTFIX_myhostname
+          valueFrom:
+            secretKeyRef:
+              key: postfix-hostname
+              name: {{ include "hcfmailer.fullname" . }}-smtpd
+        - name: POSTFIX_helo_name
+          valueFrom:
+            secretKeyRef:
+              key: postfix-hostname
+              name: {{ include "hcfmailer.fullname" . }}-smtpd
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ .Values.kubernetesClusterDomain }}
+        image: {{ .Values.smtpd.smtpd.image.repository }}:{{ .Values.smtpd.smtpd.image.tag
+          | default .Chart.AppVersion }}
+        name: smtpd
+        ports:
+        - containerPort: 25
+        resources: {{- toYaml .Values.smtpd.smtpd.resources | nindent 10 }}
+        volumeMounts:
+        - mountPath: /listmonk/backups
+          name: hcfmailing-backups
+      restartPolicy: Always
+      volumes:
+      - name: hcfmailing-backups
+        persistentVolumeClaim:
+          claimName: {{ include "hcfmailer.fullname" . }}-hcfmailing-backups
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hcfmailer.fullname" . }}-webssh
+  labels:
+    io.kompose.service: webssh
+  {{- include "hcfmailer.labels" . | nindent 4 }}
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yml -o okteto/k8s.yml
+    kompose.version: 1.28.0 (c4137012e)
+spec:
+  replicas: {{ .Values.webssh.replicas }}
+  selector:
+    matchLabels:
+      io.kompose.service: webssh
+    {{- include "hcfmailer.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        io.kompose.network/hcf-default: "true"
+        io.kompose.service: webssh
+      {{- include "hcfmailer.selectorLabels" . | nindent 8 }}
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yml -o okteto/k8s.yml
+        kompose.version: 1.28.0 (c4137012e)
+    spec:
+      containers:
+      - env:
+        - name: LISTMONK_SSH
+          value: {{ .Values.webssh.webssh.listmonkSsh }}
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ .Values.kubernetesClusterDomain }}
+        image: {{ .Values.webssh.webssh.image.repository }}:{{ .Values.webssh.webssh.image.tag
+          | default .Chart.AppVersion }}
+        name: webssh
+        ports:
+        - containerPort: 8888
+        resources: {{- toYaml .Values.webssh.webssh.resources | nindent 10 }}
+      restartPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hcfmailer.fullname" . }}-pgadmin
+  labels:
+    io.kompose.service: pgadmin
+  {{- include "hcfmailer.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.pgadmin.replicas }}
+  selector:
+    matchLabels:
+      io.kompose.service: pgadmin
+    {{- include "hcfmailer.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        io.kompose.network/hcf-default: "true"
+        io.kompose.service: pgadmin
+      {{- include "hcfmailer.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - env:
+        - name: PGADMIN_DEFAULT_EMAIL
+          valueFrom:
+            secretKeyRef:
+              key: pgadmin-email
+              name: {{ include "hcfmailer.fullname" . }}-pgadmin
+        - name: PGADMIN_DEFAULT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: pgadmin-password
+              name: {{ include "hcfmailer.fullname" . }}-pgadmin
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ .Values.kubernetesClusterDomain }}
+        image: {{ .Values.pgadmin.pgadmin.image.repository }}:{{ .Values.pgadmin.pgadmin.image.tag
+          | default .Chart.AppVersion }}
+        name: pgadmin
+        ports:
+        - containerPort: 80
+        resources: {{- toYaml .Values.pgadmin.pgadmin.resources | nindent 10 }}
+        securityContext:
+          runAsGroup: 0
+          runAsUser: 0
+        volumeMounts:
+        - mountPath: /var/lib/pgadmin
+          name: pgadmin-data
+      restartPolicy: Always
+      volumes:
+      - name: pgadmin-data
+        persistentVolumeClaim:
+          claimName: {{ include "hcfmailer.fullname" . }}-data

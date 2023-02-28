@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "hcfmailer.fullname" . }}-listmonk
+  labels:
+  {{- include "hcfmailer.labels" . | nindent 4 }}
+stringData:
+  listmonk-password: {{ required "listmonk.listmonkPassword is required" .Values.listmonk.listmonkPassword
+    | quote }}
+  listmonk-user: {{ required "listmonk.listmonkUser is required" .Values.listmonk.listmonkUser
+    | quote }}
+  ssh-pubkey: {{ required "listmonk.sshPubkey is required" .Values.listmonk.sshPubkey
+    | quote }}
+type: Opaque

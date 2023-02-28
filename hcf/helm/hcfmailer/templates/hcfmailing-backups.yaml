@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "hcfmailer.fullname" . }}-hcfmailing-backups
+  labels:
+    io.kompose.service: hcfmailing-backups
+  {{- include "hcfmailer.labels" . | nindent 4 }}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.pvc.hcfmailingBackups.storageRequest | quote }}

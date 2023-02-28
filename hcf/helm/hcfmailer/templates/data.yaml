@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "hcfmailer.fullname" . }}-data
+  labels:
+    io.kompose.service: pgadmin-data
+  {{- include "hcfmailer.labels" . | nindent 4 }}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.pvc.data.storageRequest | quote }}
+  volumeMode: Filesystem

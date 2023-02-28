@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "hcfmailer.fullname" . }}-postgres
+  labels:
+  {{- include "hcfmailer.labels" . | nindent 4 }}
+stringData:
+  postgres-db: {{ required "postgres.postgresDb is required" .Values.postgres.postgresDb
+    | quote }}
+  postgres-password: {{ required "postgres.postgresPassword is required" .Values.postgres.postgresPassword
+    | quote }}
+  postgres-username: {{ required "postgres.postgresUsername is required" .Values.postgres.postgresUsername
+    | quote }}
+type: Opaque
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hcfmailer.fullname" . }}-postgres
+  labels:
+    io.kompose.service: postgres
+  {{- include "hcfmailer.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.postgres.type }}
+  selector:
+    io.kompose.service: postgres
+  {{- include "hcfmailer.selectorLabels" . | nindent 4 }}
+  ports:
+	{{- .Values.postgres.ports | toYaml | nindent 2 -}}

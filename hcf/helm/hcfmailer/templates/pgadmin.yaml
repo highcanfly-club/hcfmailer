@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "hcfmailer.fullname" . }}-pgadmin
+  labels:
+  {{- include "hcfmailer.labels" . | nindent 4 }}
+stringData:
+  pgadmin-email: {{ required "pgadmin.pgadminEmail is required" .Values.pgadmin.pgadminEmail
+    | quote }}
+  pgadmin-password: {{ required "pgadmin.pgadminPassword is required" .Values.pgadmin.pgadminPassword
+    | quote }}
+type: Opaque
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hcfmailer.fullname" . }}-pgadmin
+  labels:
+    io.kompose.service: pgadmin
+  {{- include "hcfmailer.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.pgadmin.type }}
+  selector:
+    io.kompose.service: pgadmin
+  {{- include "hcfmailer.selectorLabels" . | nindent 4 }}
+  ports:
+	{{- .Values.pgadmin.ports | toYaml | nindent 2 -}}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "hcfmailer.fullname" . }}-pgadmin
+  labels:
+  {{- include "hcfmailer.labels" . | nindent 4 }}
+spec:
+  rules:
+  - host: {{ required "pgadmin.pgadminHostFqdn is required" .Values.pgadmin.pgadminHostFqdn
+    | quote }}
+    http:
+      paths:
+      - backend:
+          service:
+            name: '{{ include "hcfmailer.fullname" . }}-pgadmin'
+            port:
+              number: 80
+        path: /
+        pathType: Prefix

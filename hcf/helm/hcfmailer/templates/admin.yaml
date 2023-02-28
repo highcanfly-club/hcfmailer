@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "hcfmailer.fullname" . }}-admin
+  labels:
+  {{- include "hcfmailer.labels" . | nindent 4 }}
+spec:
+  rules:
+  - host: {{ required "webssh.adminFqdnHost is required" .Values.webssh.adminFqdnHost
+    | quote }}
+    http:
+      paths:
+      - backend:
+          service:
+            name: '{{ include "hcfmailer.fullname" . }}-webssh'
+            port:
+              number: 8888
+        path: /
+        pathType: Prefix
