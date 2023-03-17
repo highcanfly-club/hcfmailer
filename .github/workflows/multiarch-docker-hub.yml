@@ -55,6 +55,7 @@ jobs:
         uses: docker/build-push-action@v4.0.0
         with:
           context: .
+          file: hcf/Dockerfile
           platforms: linux/arm64, linux/amd64
           push: true
           tags: ${{ secrets.DOCKER_IMAGE_NAME }}:latest
