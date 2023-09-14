@@ -55,7 +55,7 @@ EOF
 chmod 744 /usr/local/bin/db_restore.sh
 fi
 ./listmonk --idempotent --install --yes
-./listmonk --idempotent --update --yes
+./listmonk --idempotent --upgrade --yes
 ./listmonk &
 echo 'root:`pwgen -1`'|chpasswd
 mkdir -p /root/.ssh
