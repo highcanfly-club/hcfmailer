@@ -49,7 +49,10 @@ type sesMail struct {
 	EventType string `json:"eventType"`
 	NotifType string `json:"notificationType"`
 	Bounce    struct {
-		BounceType string `json:"bounceType"`
+		BounceType        string `json:"bounceType"`
+		BouncedRecipients []struct {
+			Status string `json:"status"`
+		} `json:"bouncedRecipients"`
 	} `json:"bounce"`
 	Mail struct {
 		Timestamp        sesTimestamp        `json:"timestamp"`
@@ -119,7 +122,8 @@ func (s *SES) ProcessBounce(b []byte) (models.Bounce, error) {
 		return bounce, fmt.Errorf("error unmarshalling SES notification: %v", err)
 	}
 
-	if !(m.EventType == "Bounce" || m.NotifType == "Bounce") {
+	if (m.EventType != "" && m.EventType != "Bounce") ||
+		(m.NotifType != "" && (m.NotifType != "Bounce" && m.NotifType != "Complaint")) {
 		return bounce, errors.New("notification type is not bounce")
 	}
 
@@ -127,9 +131,18 @@ func (s *SES) ProcessBounce(b []byte) (models.Bounce, error) {
 		return bounce, errors.New("no destination e-mails found in SES notification")
 	}
 
-	typ := "soft"
+	typ := models.BounceTypeSoft
 	if m.Bounce.BounceType == "Permanent" {
-		typ = "hard"
+		typ = models.BounceTypeHard
+	}
+	if m.Bounce.BounceType == "Transient" && len(m.Bounce.BouncedRecipients) > 0 {
+		// "Invalid domain" bounce.
+		if m.Bounce.BouncedRecipients[0].Status == "5.4.4" {
+			typ = models.BounceTypeHard
+		}
+	}
+	if m.NotifType == "Complaint" {
+		typ = models.BounceTypeComplaint
 	}
 
 	// Look for the campaign ID in headers.

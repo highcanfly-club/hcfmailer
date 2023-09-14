@@ -287,7 +287,7 @@ func (c *Core) InsertSubscriber(sub models.Subscriber, listIDs []int, listUUIDs 
 		}
 	}
 
-	// Fetch the subscriber'out full data. If the subscriber already existed and wasn't
+	// Fetch the subscriber's full data. If the subscriber already existed and wasn't
 	// created, the id will be empty. Fetch the details by e-mail then.
 	out, err := c.GetSubscriber(sub.ID, "", sub.Email)
 	if err != nil {
@@ -379,6 +379,11 @@ func (c *Core) UpdateSubscriberWithLists(id int, sub models.Subscriber, listIDs 
 		return models.Subscriber{}, err
 	}
 
+	if !preconfirm && c.constants.SendOptinConfirmation {
+		// Send a confirmation e-mail (if there are any double opt-in lists).
+		c.h.SendOptinConfirmation(out, listIDs)
+	}
+
 	return out, nil
 }
 
@@ -434,7 +439,7 @@ func (c *Core) DeleteSubscribersByQuery(query string, listIDs []int) error {
 	return err
 }
 
-// UnsubscribeByCampaign unsubscibers a given subscriber from lists in a given campaign.
+// UnsubscribeByCampaign unsubscribes a given subscriber from lists in a given campaign.
 func (c *Core) UnsubscribeByCampaign(subUUID, campUUID string, blocklist bool) error {
 	if _, err := c.q.UnsubscribeByCampaign.Exec(campUUID, subUUID, blocklist); err != nil {
 		c.log.Printf("error unsubscribing: %v", err)
@@ -446,8 +451,12 @@ func (c *Core) UnsubscribeByCampaign(subUUID, campUUID string, blocklist bool) e
 }
 
 // ConfirmOptionSubscription confirms a subscriber's optin subscription.
-func (c *Core) ConfirmOptionSubscription(subUUID string, listUUIDs []string) error {
-	if _, err := c.q.ConfirmSubscriptionOptin.Exec(subUUID, pq.Array(listUUIDs)); err != nil {
+func (c *Core) ConfirmOptionSubscription(subUUID string, listUUIDs []string, meta models.JSON) error {
+	if meta == nil {
+		meta = models.JSON{}
+	}
+
+	if _, err := c.q.ConfirmSubscriptionOptin.Exec(subUUID, pq.Array(listUUIDs), meta); err != nil {
 		c.log.Printf("error confirming subscription: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			c.i18n.Ts("globals.messages.errorUpdating", "name", "{globals.terms.subscribers}", "error", pqErrMsg(err)))
