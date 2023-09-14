@@ -32,7 +32,6 @@ http.interceptors.response.use((resp) => {
     store.commit('setLoading', { model: resp.config.loading, status: false });
   }
 
-
   let data = {};
   if (typeof resp.data.data === 'object') {
     if (resp.data.data.constructor === Object) {
@@ -114,6 +113,12 @@ export const getLists = (params) => http.get('/api/lists',
     params: (!params ? { per_page: 'all' } : params),
     loading: models.lists,
     store: models.lists,
+  });
+
+export const queryLists = (params) => http.get('/api/lists',
+  {
+    params: (!params ? { per_page: 'all' } : params),
+    loading: models.lists,
   });
 
 export const getList = async (id) => http.get(`/api/lists/${id}`,
@@ -245,8 +250,8 @@ export const deleteCampaign = async (id) => http.delete(`/api/campaigns/${id}`,
   { loading: models.campaigns });
 
 // Media.
-export const getMedia = async () => http.get('/api/media',
-  { loading: models.media, store: models.media });
+export const getMedia = async (params) => http.get('/api/media',
+  { params, loading: models.media, store: models.media });
 
 export const uploadMedia = (data) => http.post('/api/media', data,
   { loading: models.media });

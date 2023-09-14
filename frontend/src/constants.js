@@ -22,11 +22,11 @@ export const uris = Object.freeze({
   previewTemplate: '/api/templates/:id/preview',
   previewRawTemplate: '/api/templates/preview',
   exportSubscribers: '/api/subscribers/export',
+  errorEvents: '/api/events?type=error',
   base: `${baseURL}/static`,
   root: rootURL,
   static: `${baseURL}/static`,
 });
-
 
 // Keys used in Vuex store.
 export const storeKeys = Object.freeze({

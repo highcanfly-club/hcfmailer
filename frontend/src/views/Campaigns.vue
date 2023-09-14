@@ -408,7 +408,6 @@ export default Vue.extend({
         sendAt = dayjs(c.sendAt).isAfter(now) ? c.sendAt : now.add(7, 'day');
       }
 
-
       const data = {
         name,
         subject: c.subject,
@@ -427,6 +426,7 @@ export default Vue.extend({
         archive: c.archive,
         archive_template_id: c.archiveTemplateId,
         archive_meta: c.archiveMeta,
+        media: c.media.map((m) => m.id),
       };
 
       this.$api.createCampaign(data).then((d) => {
